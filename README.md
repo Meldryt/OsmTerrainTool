@@ -4,6 +4,8 @@
 
 Show osm map with elevation data based on dtm (currently only .hgt files are supported).
 
+![app screenshot.](resources/screenshots/01.png)
+
 ## Requirements
 
 * Currently only tested on Ubuntu
