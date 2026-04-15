@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/">
+        <file>Main.qml</file>
+        <file>GeoJsonDelegate.qml</file>
+        <file>resources/maps/de_at_ch_it.json</file>
+    </qresource>
+</RCC>
