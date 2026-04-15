@@ -94,8 +94,8 @@ void RhiItemRenderer::initialize(QRhiCommandBuffer *cb)
         m_pipeline->setTopology(QRhiGraphicsPipeline::Topology::TriangleStrip);
 
         m_pipeline->setShaderStages({
-           { QRhiShaderStage::Vertex, getShader(QLatin1String(":/qtosmterraintool/resources/shaders/color.vert.qsb")) },
-           { QRhiShaderStage::Fragment, getShader(QLatin1String(":/qtosmterraintool/resources/shaders/color.frag.qsb")) }
+           { QRhiShaderStage::Vertex, getShader(QLatin1String(":/osmterraintool/resources/shaders/color.vert.qsb")) },
+           { QRhiShaderStage::Fragment, getShader(QLatin1String(":/osmterraintool/resources/shaders/color.frag.qsb")) }
         });
         m_pipeline->setSampleCount(m_sampleCount);
 

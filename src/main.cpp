@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 
     QQmlApplicationEngine engine;
 
-    QCoreApplication::setApplicationName("QtOsmTerrainTool");
+    QCoreApplication::setApplicationName("OsmTerrainTool");
     QCoreApplication::setApplicationVersion("1.0.0");
 
     QLoggingCategory::setFilterRules("qt.network.http2=false");

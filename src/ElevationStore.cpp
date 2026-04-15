@@ -6,6 +6,7 @@
 #include <iostream>
 
 #include <QRegularExpression>
+#include <QDir>
 
 // Initialize static members
 ElevationStore* ElevationStore::instancePtr = nullptr;
@@ -29,11 +30,10 @@ void ElevationStore::loadSettings()
         return;
     }
 
-    const QByteArray envSrcPath = qgetenv("SRC_PATH");
     const QString relativePath = settingsHandler->dtmTilePath();
-    if(!envSrcPath.isEmpty() && !relativePath.isEmpty())
+    if(!relativePath.isEmpty())
     {
-        QString dtmResourcesPath = QString::fromUtf8(envSrcPath) + "/"+ relativePath;
+        QString dtmResourcesPath = QDir::homePath() + "/"+ relativePath;
         m_dtmResourcePath = dtmResourcesPath.toStdString();
     }
 

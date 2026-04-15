@@ -2,7 +2,7 @@ cmake_minimum_required(VERSION 3.22)
 
 set(CMAKE_CXX_STANDARD 20)
 
-set(TARGET_NAME "QtOsmTerrainTool")
+set(TARGET_NAME "OsmTerrainTool")
 
 project(
   ${TARGET_NAME}
@@ -89,7 +89,7 @@ qt6_add_resources(${TARGET_NAME} "qml"
 
 qt_add_qml_module(${TARGET_NAME}
     URI
-        qtosmterraintool
+        osmterraintool
     QML_FILES
         Main.qml
         GeoJsonDelegate.qml
@@ -104,7 +104,7 @@ qt_add_shaders(${TARGET_NAME} "${TARGET_NAME}_shaders"
     PRECOMPILE
     OPTIMIZED
     PREFIX
-        qtosmterraintool
+        osmterraintool
     FILES
         resources/shaders/color.vert
         resources/shaders/color.frag
@@ -115,7 +115,7 @@ qt_add_shaders(${TARGET_NAME} "${TARGET_NAME}_effect_shaders"
     PRECOMPILE
     OPTIMIZED
     PREFIX
-        qtosmterraintool
+        osmterraintool
     FILES
         resources/shaders/checker.frag
 )
@@ -127,7 +127,7 @@ install(TARGETS ${TARGET_NAME}
 )
 
 #qt_add_qml_module(${TARGET_NAME}
-#    URI qtosmterraintool
+#    URI osmterraintool
 #    VERSION 1.0
 #    QML_FILES 
 #        Main.qml

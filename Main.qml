@@ -7,7 +7,7 @@ import QtLocation
 import QtCore
 import QtQuick.Shapes
 
-import qtosmterraintool
+import osmterraintool
 
 ApplicationWindow {
     id: win

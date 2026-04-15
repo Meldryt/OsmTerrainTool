@@ -1,4 +1,4 @@
-# QtOsmTerrainTool
+# OsmTerrainTool
 
 ## Description
 
@@ -10,8 +10,7 @@ Show osm map with elevation data based on dtm (currently only .hgt files are sup
 * Qt6.8 or higher
 * Download dtm (.hgt) files from your favourite website (recommended: https://sonny.4lima.de/)
 * in QtCreator set project environment variable SRC_PATH to project root directory
-* in QtCreator set project environment variable RESOURCES_PATH ${SRC_PATH}/resources
-* adjust settings.ini and add your tile server url for accessing osm
+* adjust settings.ini, set relative path (home dir) to dtm folder and add your tile server url to access osm
 
 ## Upcoming Plans/Ideas
 
