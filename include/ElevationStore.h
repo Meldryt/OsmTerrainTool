@@ -38,10 +38,11 @@ public:
 
     Q_INVOKABLE QGeoCoordinate requestHighestPoint(const QGeoCoordinate coordinate, const float radius);
     Q_INVOKABLE QGeoCoordinate requestLowestPoint(const QGeoCoordinate coordinate, const float radius);
-    Q_INVOKABLE QPointF convertLatLongToPos(const QGeoCoordinate coordinate);
+    Q_INVOKABLE QPoint convertLatLongToPos(const QGeoCoordinate coordinate);
     Q_INVOKABLE QGeoCoordinate convertPosToLatLong(const QPointF point);
     Q_INVOKABLE float distanceLatLongToMeters(const QGeoCoordinate coord1, const QGeoCoordinate coord2);
     Q_INVOKABLE void requestHeights(const QGeoCoordinate mapCenter, const float zoomLevel, const QGeoRectangle mapBounds);
+    Q_INVOKABLE QGeoCoordinate getNewCoordinate(const QGeoCoordinate oldCoord, const float dxMeters, const float dyMeters);
 
     std::vector<int16_t>& requestedHeights();
 

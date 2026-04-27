@@ -98,27 +98,6 @@ ApplicationWindow {
             updateHeights()
         }
 
-        function addGeoItem(item)
-        {
-            var co = Qt.createComponent('mapitems/'+item+'.qml')
-            if (co.status === Component.Ready) {
-                unfinishedItem = co.createObject(map)
-                unfinishedItem.setGeometry(tapHandler.lastCoordinate)
-                unfinishedItem.addGeometry(hoverHandler.currentCoordinate, false)
-                view.map.addMapItem(unfinishedItem)
-            } else {
-                console.log(item + " is not supported right now, please call us later.")
-            }
-        }
-
-        function finishGeoItem()
-        {
-            unfinishedItem.finishAddGeometry()
-            geoDatabase.addItem(unfinishedItem)
-            map.removeMapItem(unfinishedItem)
-            unfinishedItem = undefined
-        }
-
         function clearAllItems()
         {
             geoDatabase.clear();
@@ -126,8 +105,7 @@ ApplicationWindow {
 
         component MapMarkerItem : MapQuickItem {
             id: mapClickedItem
-            anchorPoint: Qt.point(e1.width * 0.5, e1.height + slideIn)
-            property real slideIn : 0
+            anchorPoint: Qt.point(e1.width * 0.5, e1.height)
             property color markerColor
             sourceItem: Shape {
                 id: e1
@@ -179,20 +157,17 @@ ApplicationWindow {
 
             MapMarkerItem {
                 id: clickedMapMarker
-                coordinate: geoDelegate.clickedCoordinate
-                markerColor: Qt.rgba(1,0,1,1.0)
+                markerColor: Qt.rgba(1,0,1,1)
             }
 
             MapMarkerItem {
                 id: highestMapMarker
-                coordinate: geoDelegate.highestCoordinate
-                markerColor: Qt.rgba(0,1,0,1.0)
+                markerColor: Qt.rgba(0.5,0,0,1)
             }
 
             MapMarkerItem {
                 id: lowestMapMarker
-                coordinate: geoDelegate.lowestCoordinate
-                markerColor: Qt.rgba(0,0,1,1.0)
+                markerColor: Qt.rgba(0,0,1,1)
             }
 
             RhiItem {
@@ -236,20 +211,28 @@ ApplicationWindow {
         TapHandler {
             id: tapHandler
             property variant lastCoordinate
+            property real radius: 10000
+            property variant lowestPoint
+            property variant highestPoint
+
             acceptedButtons: Qt.LeftButton | Qt.RightButton
 
             onSingleTapped: (eventPoint, button) => {
                 lastCoordinate = view.map.toCoordinate(tapHandler.point.position)
-                if (button === Qt.RightButton) {
-                    if (view.unfinishedItem !== undefined) {
-                        view.finishGeoItem()
-                    }
-                } else if (button === Qt.LeftButton) {
-                    if (view.unfinishedItem !== undefined) {
-                        if (view.unfinishedItem.addGeometry(view.map.toCoordinate(tapHandler.point.position), false)) {
-                            view.finishGeoItem()
-                        }
-                    }
+                if (button === Qt.LeftButton) {
+                    clickedMapMarker.coordinate = lastCoordinate
+                    view.map.removeMapItem(clickedMapMarker)
+                    view.map.addMapItem(clickedMapMarker)
+                    highestPoint = ElevationStore.requestHighestPoint(lastCoordinate, radius);
+                    lowestPoint = ElevationStore.requestLowestPoint(lastCoordinate, radius);
+
+                    highestMapMarker.coordinate = highestPoint
+                    view.map.removeMapItem(highestMapMarker)
+                    view.map.addMapItem(highestMapMarker)
+
+                    lowestMapMarker.coordinate = lowestPoint
+                    view.map.removeMapItem(lowestMapMarker)
+                    view.map.addMapItem(lowestMapMarker)
                 }
             }
         }

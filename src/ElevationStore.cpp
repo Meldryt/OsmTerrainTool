@@ -2,6 +2,7 @@
 #include "DtmReader.h"
 
 #include "SettingsHandler.h"
+#include "Globals.h"
 
 #include <iostream>
 
@@ -208,37 +209,42 @@ QGeoCoordinate ElevationStore::requestHighestPoint(const QGeoCoordinate coordina
         return QGeoCoordinate(0,0);
     }
 
-    const QPointF center = convertLatLongToPos(coordinate);
-    const uint32_t center_x = center.x();
-    const uint32_t center_y = center.y();
-    const uint32_t x_min = center_x - radius;
-    const uint32_t y_min = center_y - radius;
-    const uint32_t x_max = center_x + radius;
-    const uint32_t y_max = center_y + radius;
+    const float x_min = - radius / 2;
+    const float y_min = - radius / 2;
+    const float x_max = radius / 2;
+    const float y_max = radius / 2;
+    const float step = 50.0f;
     const uint32_t totalPointsLon = m_tilesLongitude.size() * m_pointsPerTile;
 
     int16_t max_height = -10000;
-    QPoint point{0,0};
+    QPoint maxPoint{0,0};
 
-    for (uint32_t y = y_min; y <= y_max; ++y)
+    for (float y = y_min; y <= y_max; y+=step)
     {
-        for (uint32_t x = x_min; x <= x_max; ++x)
+        for (float x = x_min; x <= x_max; x+=step)
         {
-            const uint32_t index = x + y * totalPointsLon;
+            const QGeoCoordinate newCoord = getNewCoordinate(coordinate, x, y);
+            if(!coordsInBounds(newCoord))
+            {
+                continue;
+            }
+
+            const QPoint newPos = convertLatLongToPos(newCoord);
+
+            const uint32_t index = newPos.x() + newPos.y() * totalPointsLon;
             const int16_t height = m_elevationData[index];
 
             if (max_height < height)
             {
                 max_height = height;
-                point = QPoint(x,y);
+                maxPoint = newPos;
             }
         }
     }
 
-    const QGeoCoordinate coord = convertPosToLatLong(point);
+    const QGeoCoordinate coord = convertPosToLatLong(maxPoint);
 
-    //const float radiusInMeter = radius * m_arcSeconds * globals::ArcSecondToMeters;
-    //qDebug() << "highest height in " << radiusInMeter << "m radius around " << coordinate << " : " << max_height << "m at " << coord;
+    qDebug() << __FUNCTION__ << " highest height in " << radius << "m radius around " << coordinate << " : " << max_height << "m at " << coord;
 
     return coord;
 }
@@ -256,52 +262,57 @@ QGeoCoordinate ElevationStore::requestLowestPoint(const QGeoCoordinate coordinat
         return QGeoCoordinate(0,0);
     }
 
-    const QPointF center = convertLatLongToPos(coordinate);
-    const uint32_t center_x = std::round(center.x());
-    const uint32_t center_y = std::round(center.y());
-    const uint32_t x_min = center_x - radius;
-    const uint32_t y_min = center_y - radius;
-    const uint32_t x_max = center_x + radius;
-    const uint32_t y_max = center_y + radius;
+    const float x_min = - radius / 2;
+    const float y_min = - radius / 2;
+    const float x_max = radius / 2;
+    const float y_max = radius / 2;
+    const float step = 50.0f;
     const uint32_t totalPointsLon = m_tilesLongitude.size() * m_pointsPerTile;
 
     int16_t min_height = 10000;
-    QPoint point{0,0};
+    QPoint minPoint{0,0};
 
-    for (uint32_t y = y_min; y <= y_max; ++y)
+    for (float y = y_min; y <= y_max; y+=step)
     {
-        for (uint32_t x = x_min; x <= x_max; ++x)
+        for (float x = x_min; x <= x_max; x+=step)
         {
-            const uint32_t index = x + y * totalPointsLon;
+            const QGeoCoordinate newCoord = getNewCoordinate(coordinate, x, y);
+            if(!coordsInBounds(newCoord))
+            {
+                continue;
+            }
+
+            const QPoint newPos = convertLatLongToPos(newCoord);
+
+            const uint32_t index = newPos.x() + newPos.y() * totalPointsLon;
             const int16_t height = m_elevationData[index];
 
             if (min_height > height)
             {
                 min_height = height;
-                point = QPoint(x,y);
+                minPoint = newPos;
             }
         }
     }
 
-    const QGeoCoordinate coord = convertPosToLatLong(point);
+    const QGeoCoordinate coord = convertPosToLatLong(minPoint);
 
-    //const float radiusInMeter = radius * m_arcSeconds * globals::ArcSecondToMeters;
-    //qDebug() << "lowest height in " << radiusInMeter << "m radius around " << coordinate << " : " << min_height << "m at " << coord;
+    qDebug() << __FUNCTION__ << " lowest height in " << radius << "m radius around " << coordinate << " : " << min_height << "m at " << coord;
 
     return coord;
 }
 
-QPointF ElevationStore::convertLatLongToPos(const QGeoCoordinate coordinate)
+QPoint ElevationStore::convertLatLongToPos(const QGeoCoordinate coordinate)
 {
     const uint8_t longitudeStart = m_tilesLongitude.front();
     const uint8_t latitudeStart = m_tilesLatitude.front();
 
     QPointF scale{1.0,1.0};
-    QPointF point;
+    QPoint point;
     const double x = (coordinate.longitude() - longitudeStart) * m_pointsPerTile;
     const double y = (coordinate.latitude() - latitudeStart)  * m_pointsPerTile;
-    point.setX(scale.x() * x);
-    point.setY(scale.y() * y);
+    point.setX(std::round(scale.x() * x));
+    point.setY(std::round(scale.y() * y));
 
     return point;
 }
@@ -348,9 +359,22 @@ float ElevationStore::distanceLatLongToMeters(const QGeoCoordinate coord1, const
     const double d = radiusEarth * c;
     const double distance = (d * 1000.0); // meters
 
-    qDebug() << "distance between " << coord1 << " and " << coord2 << " is " << distance << " m";
+    qDebug() << __FUNCTION__ << " distance between " << coord1 << " and " << coord2 << " is " << distance << " m";
 
     return distance;
+}
+
+QGeoCoordinate ElevationStore::getNewCoordinate(const QGeoCoordinate oldCoord, const float dxMeters, const float dyMeters)
+{
+    const double degree2rad = 180.0 / M_PI;
+    const double rad2degree = M_PI / 180.0;
+    const double radiusEarth = 1000.0 * 6378.137; // Radius of earth in KM
+
+    const double newLat  = oldCoord.latitude()  + (dyMeters / radiusEarth) * degree2rad;
+    const double newLon = oldCoord.longitude() + (dxMeters / radiusEarth) * degree2rad / cos(oldCoord.latitude() * rad2degree);
+    const QGeoCoordinate newCoord = QGeoCoordinate(newLat, newLon);
+
+    return newCoord;
 }
 
 void ElevationStore::requestHeights(const QGeoCoordinate mapCenter, const float zoomLevel, const QGeoRectangle mapBounds)
