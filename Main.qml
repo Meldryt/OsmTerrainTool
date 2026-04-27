@@ -59,7 +59,7 @@ ApplicationWindow {
 
     GeoJsonData {
         id: geoDatabase
-        sourceUrl: GeoJsonMapsPath + "/de_at_ch_it.json"
+        //sourceUrl: GeoJsonMapsPath + "/de_at_ch_it.json"
     }
 
     function updateHeights()

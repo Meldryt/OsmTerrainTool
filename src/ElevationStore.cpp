@@ -25,17 +25,13 @@ void ElevationStore::loadSettings()
 {
     SettingsHandler* settingsHandler = SettingsHandler::instance();
 
-    if(!settingsHandler->settingsLoaded())
+    if(!settingsHandler->settingsLoaded() || settingsHandler->dtmTilePath().isEmpty())
     {
         return;
     }
 
-    const QString relativePath = settingsHandler->dtmTilePath();
-    if(!relativePath.isEmpty())
-    {
-        QString dtmResourcesPath = QDir::homePath() + "/"+ relativePath;
-        m_dtmResourcePath = dtmResourcesPath.toStdString();
-    }
+    QString dtmResourcesPath = QDir::homePath() + "/"+ settingsHandler->dtmTilePath();
+    m_dtmResourcePath = dtmResourcesPath.toStdString();
 
     m_pointsPerTile = settingsHandler->dtmTileResolution();
 
@@ -114,7 +110,7 @@ void ElevationStore::loadSettings()
 
 void ElevationStore::loadElevations()
 {
-    if(m_dtmResourcePath.empty())
+    if(!m_initialized)
     {
         return;
     }
@@ -159,21 +155,13 @@ void ElevationStore::loadElevations()
 }
 
 void ElevationStore::readHgtFile(const std::string strFile, const uint32_t offsetX, const uint32_t offsetY, const uint32_t sizeX)
-{
-
-    if(m_dtmResourcePath.empty())
+{   
+    if(!m_initialized)
     {
         return;
     }
+
     std::string hgtPath = m_dtmResourcePath;
-    // if(m_pointsPerTile == globals::TilePixels1ArcSecond)
-    // {
-    //     hgtPath += globals::DtmFolder_1ArcSecond + "/";
-    // }
-    // else if(m_pointsPerTile == globals::TilePixels3ArcSecond)
-    // {
-    //     hgtPath += globals::DtmFolder_3ArcSecond + "/";
-    // }
 
     const uint32_t elevationPoints = m_pointsPerTile * m_pointsPerTile;
     std::vector<int16_t> tempElevationData;
@@ -209,6 +197,11 @@ void ElevationStore::readHgtFile(const std::string strFile, const uint32_t offse
 
 QGeoCoordinate ElevationStore::requestHighestPoint(const QGeoCoordinate coordinate, const float radius)
 {
+    if(!m_initialized)
+    {
+        return QGeoCoordinate(0,0);
+    }
+
     if(!coordsInBounds(coordinate))
     {
         qWarning() << __FUNCTION__ << " coord " << coordinate << " is out of bounds!";
@@ -252,6 +245,11 @@ QGeoCoordinate ElevationStore::requestHighestPoint(const QGeoCoordinate coordina
 
 QGeoCoordinate ElevationStore::requestLowestPoint(const QGeoCoordinate coordinate, const float radius)
 {
+    if(!m_initialized)
+    {
+        return QGeoCoordinate(0,0);
+    }
+
     if(!coordsInBounds(coordinate))
     {
         qWarning() << __FUNCTION__ << " coord " << coordinate << " is out of bounds!";
@@ -357,6 +355,11 @@ float ElevationStore::distanceLatLongToMeters(const QGeoCoordinate coord1, const
 
 void ElevationStore::requestHeights(const QGeoCoordinate mapCenter, const float zoomLevel, const QGeoRectangle mapBounds)
 {
+    if(!m_initialized)
+    {
+        return;
+    }
+
     const QGeoCoordinate rectBottomLeft = mapBounds.bottomLeft();
 
     const QGeoCoordinate rectTopRight = mapBounds.topRight();

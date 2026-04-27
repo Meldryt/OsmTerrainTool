@@ -77,7 +77,6 @@ target_sources(${TARGET_NAME}
 set(qml_resource_files
     "GeoJsonDelegate.qml"
     "Main.qml"
-    "resources/maps/de_at_ch_it.json"
 )
 
 qt6_add_resources(${TARGET_NAME} "qml"

@@ -256,6 +256,11 @@ void RhiItemRenderer::updateBuffers(QRhiCommandBuffer *cb)
 {
     ElevationStore* elevationStore = ElevationStore::instance();
     std::vector<int16_t>& heights = elevationStore->requestedHeights();
+    if(heights.empty())
+    {
+        return;
+    }
+
     static uint32_t lastHeightCount = 0;
     const uint32_t heightCount = elevationStore->heightCount();
     const int32_t minHeight = elevationStore->minHeight();
